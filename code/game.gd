@@ -1,14 +1,32 @@
 
 extends Node2D
 
+var Hitbox = 0;
+var HitboxInitialPos = Vector2(0, -120)
+
 func _ready():
 	set_fixed_process(false)
 
 	var Root = get_node("/root").get_child(0)
-	var Hitbox = preload("res://StaticHitbox.tscn").instance()
+	Hitbox = preload("res://StaticHitbox.tscn").instance()
 
 	Root.add_child(Hitbox)
 	Hitbox.set_owner(Root)
+	Hitbox.set_pos(HitboxInitialPos)
 
-	# NOTE(hugo) : Hard-coding the initial pos of the hitbox
-	Hitbox.set_pos(Vector2(0, -120))
+	var TimerNode = find_node("Timer")
+	TimerNode.connect("timeout", self, "OnTimerTimeout")
+
+func OnTimerTimeout():
+	# TODO(hugo) : Is the root this very node ?
+	var Root = get_node("/root").get_child(0)
+
+	if(typeof(Hitbox) != TYPE_NIL):
+		Root.remove_child(Hitbox)
+		Hitbox.free()
+
+	Hitbox = preload("res://StaticHitbox.tscn").instance()
+
+	Hitbox.set_pos(HitboxInitialPos)
+	Root.add_child(Hitbox)
+	Hitbox.set_owner(Root)
